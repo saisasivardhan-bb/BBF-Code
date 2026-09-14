@@ -20,6 +20,9 @@ env:
   ELECTRON_SKIP_BINARY_DOWNLOAD: 1
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
   npm_config_foreground_scripts: 'true'
+  # The built-in Microsoft extensions (js-debug, ...) are fetched from their
+  # GitHub releases; authenticated requests avoid the anonymous rate limit.
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ENGINE_BUN_VERSION: 1.4.2
 
 jobs:

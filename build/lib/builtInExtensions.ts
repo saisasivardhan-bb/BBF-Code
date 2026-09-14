@@ -93,13 +93,27 @@ function getExtensionDownloadStream(extension: IExtensionDefinition) {
 			return es.readArray([]);
 		}
 		input = ext.fromGithub(extension, { asset, latest: isInsiders() });
-	} else if (productjson.extensionsGallery?.serviceUrl) {
-		input = ext.fromMarketplace(productjson.extensionsGallery.serviceUrl, extension);
+	} else if (galleryServesBuiltInExtensions()) {
+		input = ext.fromMarketplace(productjson.extensionsGallery!.serviceUrl, extension);
 	} else {
 		input = ext.fromGithub(extension, { latest: isInsiders() });
 	}
 
 	return input.pipe(rename(p => p.dirname = `${extension.name}/${p.dirname}`));
+}
+
+/**
+ * Whether the configured gallery can serve the built-in Microsoft extensions.
+ *
+ * BBF: product.json points the gallery at BBF's own server, which only carries
+ * BBF's extensions; asking it for `ms-vscode.js-debug` is a 404. Those
+ * extensions publish the same VSIX (same pinned checksum) on GitHub, so any
+ * gallery other than Microsoft's marketplace falls back to GitHub releases,
+ * exactly as a build with no gallery configured does.
+ */
+function galleryServesBuiltInExtensions(): boolean {
+	const serviceUrl = productjson.extensionsGallery?.serviceUrl;
+	return !!serviceUrl && /^https:\/\/marketplace\.visualstudio\.com\//.test(serviceUrl);
 }
 
 function resolvePlatformSpecificAsset(extension: IExtensionDefinition): { assetName: string; sha256: string } | undefined {
@@ -133,8 +147,7 @@ export function getExtensionStream(extension: IExtensionDefinition) {
 }
 
 function syncMarketplaceExtension(extension: IExtensionDefinition): Stream {
-	const galleryServiceUrl = productjson.extensionsGallery?.serviceUrl;
-	const source = ansiColors.blue(galleryServiceUrl ? '[marketplace]' : '[github]');
+	const source = ansiColors.blue(galleryServesBuiltInExtensions() ? '[marketplace]' : '[github]');
 	if (isUpToDate(extension)) {
 		log(source, `${extension.name}@${extension.version}`, ansiColors.green('✔︎'));
 		return es.readArray([]);
