@@ -50,6 +50,20 @@ jobs:
           bun run script/build.ts --single --skip-install --skip-embed-web-ui
           ls -la dist/opencode-windows-x64/bin
 
+      # build/npm/preinstall.ts accepts a C++ toolchain only in a folder named
+      # "2022" or "2019", while the runner ships Visual Studio 2026 under
+      # "Microsoft Visual Studio\18". node-gyp finds that install by itself, so
+      # pointing the override at whatever vswhere reports keeps the check
+      # honest instead of loosening it.
+      - name: Locate Visual Studio
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vs) { throw "No Visual Studio with the C++ tools was found on this runner." }
+          Write-Host "Using Visual Studio at $vs"
+          "vs2022_install=$vs" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Install dependencies
         run: npm ci
 
@@ -95,7 +109,9 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential g++ python3 libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev fakeroot rpm
+          sudo apt-get install -y build-essential g++ python3 libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev fakeroot rpm pkg-config libssl-dev
+
+      - uses: dtolnay/rust-toolchain@stable
 
       - uses: actions/setup-node@v4
         with:
@@ -125,23 +141,50 @@ jobs:
           cp bbf-ai-engine/packages/opencode/dist/opencode-linux-x64/bin/opencode ../VSCode-linux-x64/resources/app/bin/opencode
           chmod +x ../VSCode-linux-x64/resources/app/bin/opencode
 
+      # The archive is the artifact every Linux user can install, so it is made
+      # before the packages below, which need more of the product to be present.
+      - name: Build tar.gz
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          mkdir -p dist-release
+          tar -czf "dist-release/bbf-code-linux-x64-$VERSION.tar.gz" -C .. VSCode-linux-x64
+
+      # deb and rpm compute their shared-library dependencies by reading every
+      # binary in the package, the tunnel CLI included
+      # (build/linux/dependencies-generator.ts), so the Rust CLI has to exist
+      # before either can be built. It is a separate toolchain, and a failure
+      # here must not cost the release the archive above, so this step and the
+      # two package steps are allowed to fail and report a warning.
+      - name: Build CLI (tunnel binary)
+        id: cli
+        continue-on-error: true
+        working-directory: cli
+        run: |
+          cargo build --release
+          mkdir -p ../../VSCode-linux-x64/bin
+          cp target/release/code "../../VSCode-linux-x64/bin/$(node -p "require('../product.json').tunnelApplicationName")"
+          chmod +x "../../VSCode-linux-x64/bin/$(node -p "require('../product.json').tunnelApplicationName")"
+
       - name: Build deb
+        id: deb
+        if: steps.cli.outcome == 'success'
+        continue-on-error: true
         run: |
           npm run gulp vscode-linux-x64-prepare-deb
           npm run gulp vscode-linux-x64-build-deb
 
       - name: Build rpm
+        id: rpm
+        if: steps.cli.outcome == 'success'
+        continue-on-error: true
         run: |
           npm run gulp vscode-linux-x64-prepare-rpm
           npm run gulp vscode-linux-x64-build-rpm
 
       - name: Collect
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          mkdir -p dist-release
-          cp .build/linux/deb/amd64/deb/*.deb dist-release/
-          cp .build/linux/rpm/x86_64/rpmbuild/RPMS/x86_64/*.rpm dist-release/
-          tar -czf "dist-release/bbf-code-linux-x64-$VERSION.tar.gz" -C .. VSCode-linux-x64
+          cp .build/linux/deb/amd64/deb/*.deb dist-release/ 2>/dev/null || echo "no deb produced (CLI: ${{ steps.cli.outcome }}, deb: ${{ steps.deb.outcome }})"
+          cp .build/linux/rpm/x86_64/rpmbuild/RPMS/x86_64/*.rpm dist-release/ 2>/dev/null || echo "no rpm produced (rpm: ${{ steps.rpm.outcome }})"
           ls -la dist-release
 
       - uses: actions/upload-artifact@v4
