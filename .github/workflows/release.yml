@@ -196,10 +196,15 @@ jobs:
           npm run gulp vscode-linux-x64-prepare-rpm
           npm run gulp vscode-linux-x64-build-rpm
 
+      # deb and rpm name themselves with a build timestamp, so every run would
+      # add another asset beside the last one instead of replacing it, and a
+      # release would end up offering several builds of the same version. The
+      # version is what a reader needs; the timestamp is not.
       - name: Collect
         run: |
-          cp .build/linux/deb/amd64/deb/*.deb dist-release/ 2>/dev/null || echo "no deb produced (CLI: ${{ steps.cli.outcome }}, deb: ${{ steps.deb.outcome }})"
-          cp .build/linux/rpm/x86_64/rpmbuild/RPMS/x86_64/*.rpm dist-release/ 2>/dev/null || echo "no rpm produced (rpm: ${{ steps.rpm.outcome }})"
+          VERSION=$(node -p "require('./package.json').version")
+          cp .build/linux/deb/amd64/deb/*.deb "dist-release/bbf-code-linux-x64-$VERSION.deb" 2>/dev/null || echo "no deb produced (CLI: ${{ steps.cli.outcome }}, deb: ${{ steps.deb.outcome }})"
+          cp .build/linux/rpm/x86_64/rpmbuild/RPMS/x86_64/*.rpm "dist-release/bbf-code-linux-x64-$VERSION.rpm" 2>/dev/null || echo "no rpm produced (rpm: ${{ steps.rpm.outcome }})"
           ls -la dist-release
 
       - uses: actions/upload-artifact@v4
