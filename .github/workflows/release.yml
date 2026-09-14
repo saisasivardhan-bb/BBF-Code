@@ -64,6 +64,21 @@ jobs:
           Write-Host "Using Visual Studio at $vs"
           "vs2022_install=$vs" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      # Packaging strips the Authenticode signature from the binaries it
+      # rebrands -- ripgrep's rg.exe and the like -- before rcedit rewrites
+      # their version information, and it calls signtool.exe by bare name.
+      # The tool ships in the Windows SDK, which is installed on the runner
+      # but is not on PATH.
+      - name: Put signtool on PATH
+        shell: pwsh
+        run: |
+          $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin" -Filter signtool.exe -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -like '*\x64\signtool.exe' } |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $signtool) { throw "signtool.exe was not found in the Windows SDK on this runner." }
+          Write-Host "Using $($signtool.FullName)"
+          Split-Path $signtool.FullName | Out-File -FilePath $env:GITHUB_PATH -Append
+
       - name: Install dependencies
         run: npm ci
 
