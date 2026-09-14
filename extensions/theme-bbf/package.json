@@ -1,0 +1,32 @@
+{
+  "name": "theme-bbf",
+  "displayName": "%displayName%",
+  "description": "%description%",
+  "version": "1.0.0",
+  "publisher": "vscode",
+  "license": "MIT",
+  "engines": {
+    "vscode": "*"
+  },
+  "categories": ["Themes"],
+  "contributes": {
+    "themes": [
+      {
+        "id": "BBF Dark",
+        "label": "%bbfDarkThemeLabel%",
+        "uiTheme": "vs-dark",
+        "path": "./themes/bbf-dark-color-theme.json"
+      },
+      {
+        "id": "BBF Light",
+        "label": "%bbfLightThemeLabel%",
+        "uiTheme": "vs",
+        "path": "./themes/bbf-light-color-theme.json"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blackboxfactories/bbf-code.git"
+  }
+}

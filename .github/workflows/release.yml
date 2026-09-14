@@ -1,0 +1,222 @@
+name: Release
+
+# Builds BBF Code installers for Windows, Linux and macOS and attaches them to a
+# GitHub Release.
+#
+# Each job builds the BBF AI Coder engine natively with bun from bbf-ai-engine/
+# and places it at resources/app/bin/ inside the package, which is where the
+# extension looks for it (extensions/bbf-ai-coder/src/engineProcess.ts).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  # Skip downloads the build does not need on CI.
+  ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+  npm_config_foreground_scripts: 'true'
+  ENGINE_BUN_VERSION: 1.4.2
+
+jobs:
+  windows:
+    name: Windows x64 (Inno Setup)
+    runs-on: windows-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.ENGINE_BUN_VERSION }}
+
+      - name: Build engine (opencode-windows-x64)
+        shell: bash
+        working-directory: bbf-ai-engine
+        run: |
+          bun install
+          cd packages/opencode
+          bun run script/build.ts --single --skip-install --skip-embed-web-ui
+          ls -la dist/opencode-windows-x64/bin
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Transpiles and bundles with esbuild, compiles the built-in extensions,
+      # and packages into ../VSCode-win32-x64 (see build/gulpfile.vscode.ts).
+      - name: Build and package
+        run: npm run gulp vscode-win32-x64-min
+
+      - name: Add engine to package
+        shell: bash
+        run: |
+          mkdir -p ../VSCode-win32-x64/resources/app/bin
+          cp bbf-ai-engine/packages/opencode/dist/opencode-windows-x64/bin/opencode.exe ../VSCode-win32-x64/resources/app/bin/opencode.exe
+
+      - name: Build installers
+        run: |
+          npm run gulp vscode-win32-x64-inno-updater
+          npm run gulp vscode-win32-x64-user-setup
+          npm run gulp vscode-win32-x64-system-setup
+
+      - name: Collect
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          mkdir -p dist-release
+          cp .build/win32-x64/user-setup/BBFCodeSetup.exe   "dist-release/BBFCodeUserSetup-x64-$VERSION.exe"
+          cp .build/win32-x64/system-setup/BBFCodeSetup.exe "dist-release/BBFCodeSetup-x64-$VERSION.exe"
+          ls -la dist-release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: dist-release/*
+          if-no-files-found: error
+
+  linux:
+    name: Linux x64 (deb, rpm, tar.gz)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential g++ python3 libx11-dev libxkbfile-dev libsecret-1-dev libkrb5-dev fakeroot rpm
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.ENGINE_BUN_VERSION }}
+
+      - name: Build engine (opencode-linux-x64)
+        working-directory: bbf-ai-engine
+        run: |
+          bun install
+          cd packages/opencode
+          bun run script/build.ts --single --skip-install --skip-embed-web-ui
+          ls -la dist/opencode-linux-x64/bin
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and package
+        run: npm run gulp vscode-linux-x64-min
+
+      - name: Add engine to package
+        run: |
+          mkdir -p ../VSCode-linux-x64/resources/app/bin
+          cp bbf-ai-engine/packages/opencode/dist/opencode-linux-x64/bin/opencode ../VSCode-linux-x64/resources/app/bin/opencode
+          chmod +x ../VSCode-linux-x64/resources/app/bin/opencode
+
+      - name: Build deb
+        run: |
+          npm run gulp vscode-linux-x64-prepare-deb
+          npm run gulp vscode-linux-x64-build-deb
+
+      - name: Build rpm
+        run: |
+          npm run gulp vscode-linux-x64-prepare-rpm
+          npm run gulp vscode-linux-x64-build-rpm
+
+      - name: Collect
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          mkdir -p dist-release
+          cp .build/linux/deb/amd64/deb/*.deb dist-release/
+          cp .build/linux/rpm/x86_64/rpmbuild/RPMS/x86_64/*.rpm dist-release/
+          tar -czf "dist-release/bbf-code-linux-x64-$VERSION.tar.gz" -C .. VSCode-linux-x64
+          ls -la dist-release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: dist-release/*
+          if-no-files-found: error
+
+  macos:
+    name: macOS arm64 (zip, dmg)
+    runs-on: macos-14
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.ENGINE_BUN_VERSION }}
+
+      - name: Build engine (opencode-darwin-arm64)
+        working-directory: bbf-ai-engine
+        run: |
+          bun install
+          cd packages/opencode
+          bun run script/build.ts --single --skip-install --skip-embed-web-ui
+          ls -la dist/opencode-darwin-arm64/bin
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and package
+        run: npm run gulp vscode-darwin-arm64-min
+
+      - name: Add engine to package
+        run: |
+          APP="../VSCode-darwin-arm64/BBF Code.app"
+          mkdir -p "$APP/Contents/Resources/app/bin"
+          cp bbf-ai-engine/packages/opencode/dist/opencode-darwin-arm64/bin/opencode "$APP/Contents/Resources/app/bin/opencode"
+          chmod +x "$APP/Contents/Resources/app/bin/opencode"
+
+      # Unsigned: users must right-click > Open (or remove the quarantine
+      # attribute) the first time. Add Developer ID signing + notarization here
+      # when the certificate is available.
+      - name: Collect
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          mkdir -p dist-release
+          (cd ../VSCode-darwin-arm64 && ditto -c -k --keepParent "BBF Code.app" "$GITHUB_WORKSPACE/dist-release/BBFCode-darwin-arm64-$VERSION.zip")
+          hdiutil create -volname "BBF Code" -srcfolder "../VSCode-darwin-arm64/BBF Code.app" -ov -format UDZO "dist-release/BBFCode-darwin-arm64-$VERSION.dmg"
+          ls -la dist-release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: darwin-arm64
+          path: dist-release/*
+          if-no-files-found: error
+
+  release:
+    name: Draft GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, linux, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: assets
+          merge-multiple: true
+
+      - name: List assets
+        run: ls -la assets
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: BBF Code ${{ github.ref_name }}
+          files: assets/*
+          fail_on_unmatched_files: true

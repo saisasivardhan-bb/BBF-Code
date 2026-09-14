@@ -1,0 +1,147 @@
+{
+  "name": "bbf-ai-coder",
+  "displayName": "%displayName%",
+  "description": "%description%",
+  "publisher": "vscode",
+  "license": "MIT",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "extensionKind": [
+    "ui"
+  ],
+  "enabledApiProposals": [
+    "defaultChatParticipant",
+    "chatParticipantPrivate"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension",
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "bbf.aiCoder",
+        "name": "bbf",
+        "fullName": "%participant.fullName%",
+        "description": "%participant.description%",
+        "isDefault": true,
+        "modes": [
+          "agent",
+          "ask",
+          "edit"
+        ],
+        "commands": [
+          {
+            "name": "models",
+            "description": "%command.models.description%"
+          }
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "bbf.aiCoder.selectModel",
+        "title": "%command.selectModel.title%",
+        "category": "%category%"
+      }
+    ],
+    "configuration": {
+      "title": "%configuration.title%",
+      "properties": {
+        "bbf.aiCoder.engine.path": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "markdownDescription": "%configuration.enginePath%"
+        },
+        "bbf.aiCoder.engine.port": {
+          "type": "number",
+          "default": 0,
+          "scope": "machine",
+          "markdownDescription": "%configuration.enginePort%"
+        },
+        "bbf.aiCoder.serviceUrl": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "markdownDescription": "%configuration.serviceUrl%"
+        },
+        "bbf.aiCoder.localAi.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%configuration.localAi.enabled%"
+        },
+        "bbf.aiCoder.localAi.url": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "markdownDescription": "%configuration.localAi.url%"
+        },
+        "bbf.aiCoder.localAi.contextLength": {
+          "type": "number",
+          "default": 32768,
+          "minimum": 4096,
+          "scope": "machine",
+          "markdownDescription": "%configuration.localAi.contextLength%"
+        },
+        "bbf.aiCoder.deepReasoning": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "%configuration.deepReasoning%"
+        },
+        "bbf.aiCoder.effort": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "max"
+          ],
+          "enumDescriptions": [
+            "%configuration.effort.low%",
+            "%configuration.effort.medium%",
+            "%configuration.effort.max%"
+          ],
+          "default": "medium",
+          "markdownDescription": "%configuration.effort%"
+        },
+        "bbf.aiCoder.permissionMode": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "auto"
+          ],
+          "enumDescriptions": [
+            "%configuration.permissionMode.manual%",
+            "%configuration.permissionMode.auto%"
+          ],
+          "default": "manual",
+          "markdownDescription": "%configuration.permissionMode%"
+        }
+      }
+    },
+    "languageModelChatProviders": [
+      {
+        "vendor": "bbf-zen",
+        "displayName": "BBF AI Coder"
+      },
+      {
+        "vendor": "bbf-local",
+        "displayName": "Local AI"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "gulp compile-extension:bbf-ai-coder",
+    "watch": "gulp watch-extension:bbf-ai-coder"
+  },
+  "devDependencies": {
+    "@types/node": "24.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blackboxfactories/bbf-code.git"
+  }
+}

@@ -1,0 +1,85 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Blackbox Factories. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.bbf-signin-gate {
+	position: absolute;
+	inset: 0;
+	/* Above every workbench part, including the title bar, so nothing is reachable. */
+	z-index: 2600;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 28px;
+	background: var(--vscode-editor-background, #1A1A1A);
+	color: var(--vscode-foreground, #CCCCCC);
+	font-family: var(--vscode-font-family);
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.bbf-signin-gate .bbf-gate-mark {
+	width: 132px;
+	height: auto;
+}
+
+.bbf-signin-gate .bbf-gate-title {
+	font-size: 26px;
+	font-weight: 900;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--vscode-foreground, #FFFFFF);
+	margin: 0;
+}
+
+.bbf-signin-gate .bbf-gate-subtitle {
+	font-size: 13px;
+	font-style: italic;
+	opacity: .8;
+	margin: -18px 0 0;
+	text-align: center;
+	max-width: 420px;
+	line-height: 1.6;
+}
+
+.bbf-signin-gate .bbf-gate-button {
+	font: inherit;
+	font-size: 14px;
+	font-weight: 700;
+	padding: 10px 26px;
+	border: none;
+	cursor: pointer;
+	background: #B5BC38;
+	/* Olive is a light colour, so it always carries black text. */
+	color: #000000;
+}
+
+.bbf-signin-gate .bbf-gate-button:hover:not(:disabled) {
+	background: #DC6621;
+	color: #FFFFFF;
+}
+
+.bbf-signin-gate .bbf-gate-button:disabled {
+	opacity: .6;
+	cursor: default;
+}
+
+.bbf-signin-gate .bbf-gate-error {
+	font-size: 13px;
+	color: #DC6621;
+	max-width: 460px;
+	text-align: center;
+	line-height: 1.6;
+	min-height: 20px;
+	margin: -14px 0 0;
+}
+
+.bbf-signin-gate .bbf-gate-footer {
+	position: absolute;
+	bottom: 24px;
+	font-size: 11px;
+	font-style: italic;
+	opacity: .5;
+}

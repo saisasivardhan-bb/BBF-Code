@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BBF Code — Proprietary Extensions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="bar">
+	<div class="wrap bar-inner">
+		<svg class="mark" viewBox="0 0 240 170" aria-hidden="true">
+			<polygon fill="#B5BC38" points="0 81.92 81.96 163.87 152.05 163.87 70.1 81.92 152.05 0 81.96 0 0 81.92"/>
+			<polygon fill="#DC6621" points="141.6 81.92 223.56 163.87 234.36 163.87 152.4 81.92 234.36 0 223.56 0 141.6 81.92"/>
+		</svg>
+		<div>
+			<div class="brand">BBF&nbsp;Code</div>
+			<div class="sub">/ Proprietary Extensions</div>
+		</div>
+		<div class="spacer"></div>
+		<div id="status" class="status" role="status">Loading…</div>
+	</div>
+</header>
+
+<main class="wrap">
+	<section id="error" class="panel error" hidden></section>
+
+	<section class="panel setup">
+		<h2>/// POINT BBF CODE AT THIS FEED</h2>
+		<p>Add to <code>product.json</code>, then restart BBF&nbsp;Code.</p>
+		<pre id="snippet"><code>"bbfExtensionsServiceUrl": "…"</code></pre>
+		<p class="note">/ Publish by attaching a <code>.vsix</code> to a GitHub release. The feed reads each
+			file's own manifest, so nothing else needs updating.</p>
+	</section>
+
+	<h2 class="section-title">/// AVAILABLE EXTENSIONS <span id="count" class="count"></span></h2>
+	<div id="list" class="grid"></div>
+	<div id="empty" class="panel empty" hidden>
+		<strong>No extensions published yet.</strong>
+		<p class="note">/ Attach a <code>.vsix</code> to a release in the configured repository and refresh.</p>
+	</div>
+
+	<section id="problems" class="panel warn" hidden>
+		<h3>/// SKIPPED ASSETS</h3>
+		<ul id="problem-list"></ul>
+	</section>
+</main>
+
+<footer class="wrap foot">/ Blackbox Factories — BBF Code extension feed</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "name": "bbf-google-auth",
+  "displayName": "%displayName%",
+  "description": "%description%",
+  "publisher": "vscode",
+  "license": "MIT",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "extensionKind": [
+    "ui"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension",
+  "contributes": {
+    "authentication": [
+      {
+        "label": "Google",
+        "id": "bbf-google",
+        "authorizationServerGlobs": [
+          "https://accounts.google.com/*"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "gulp compile-extension:bbf-google-auth",
+    "watch": "gulp watch-extension:bbf-google-auth"
+  },
+  "devDependencies": {
+    "@types/node": "24.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blackboxfactories/bbf-code.git"
+  }
+}

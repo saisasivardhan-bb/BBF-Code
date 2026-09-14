@@ -1,0 +1,105 @@
+{
+	"$schema": "vscode://schemas/color-theme",
+	"name": "BBF Light",
+	"include": "./bbf-base-light.json",
+	"colors": {
+		// Blackbox Factories palette on a Laundry White (#FFFFFF) ground.
+		// Body copy is Dark Grey (#5D5D5D), titles Jet Black (#000000).
+		// Olive is light, so it always carries black text; orange carries white.
+
+		"focusBorder": "#B5BC38",
+		"foreground": "#5D5D5D",
+		"descriptionForeground": "#767676",
+		"errorForeground": "#DC6621",
+
+		"textLink.foreground": "#8A9029",
+		"textLink.activeForeground": "#DC6621",
+
+		"activityBar.background": "#FFFFFF",
+		"activityBar.foreground": "#000000",
+		"activityBar.inactiveForeground": "#8C8C8C",
+		"activityBar.border": "#E5E5E5",
+		"activityBar.activeBorder": "#B5BC38",
+		"activityBarBadge.background": "#B5BC38",
+		"activityBarBadge.foreground": "#000000",
+
+		"badge.background": "#B5BC38",
+		"badge.foreground": "#000000",
+
+		"button.background": "#B5BC38",
+		"button.foreground": "#000000",
+		"button.hoverBackground": "#DC6621",
+		"button.secondaryBackground": "#F0F0F0",
+		"button.secondaryForeground": "#000000",
+		"button.secondaryHoverBackground": "#E5E5E5",
+
+		"progressBar.background": "#B5BC38",
+
+		"sideBar.background": "#F8F8F8",
+		"sideBar.border": "#E5E5E5",
+		"sideBarTitle.foreground": "#5D5D5D",
+		"sideBarSectionHeader.background": "#F0F0F0",
+		"sideBarSectionHeader.border": "#E5E5E5",
+
+		"statusBar.background": "#B5BC38",
+		"statusBar.foreground": "#000000",
+		"statusBar.border": "#A3AA32",
+		"statusBar.noFolderBackground": "#B5BC38",
+		"statusBar.debuggingBackground": "#DC6621",
+		"statusBar.debuggingForeground": "#FFFFFF",
+		"statusBarItem.remoteBackground": "#000000",
+		"statusBarItem.remoteForeground": "#FFFFFF",
+		"statusBarItem.hoverBackground": "#0000001A",
+
+		"titleBar.activeBackground": "#FFFFFF",
+		"titleBar.activeForeground": "#000000",
+		"titleBar.inactiveBackground": "#F8F8F8",
+		"titleBar.inactiveForeground": "#8C8C8C",
+		"titleBar.border": "#E5E5E5",
+
+		"editorGroupHeader.tabsBackground": "#F0F0F0",
+		"tab.activeBackground": "#FFFFFF",
+		"tab.activeForeground": "#000000",
+		"tab.inactiveBackground": "#F0F0F0",
+		"tab.inactiveForeground": "#5D5D5D",
+		"tab.activeBorderTop": "#B5BC38",
+		"tab.border": "#E5E5E5",
+
+		"panelTitle.activeBorder": "#B5BC38",
+		"panelTitle.activeForeground": "#000000",
+		"panel.border": "#E5E5E5",
+
+		"editor.background": "#FFFFFF",
+		"editor.foreground": "#3B3B3B",
+		"editorCursor.foreground": "#DC6621",
+		"editorLineNumber.activeForeground": "#8A9029",
+		"editor.selectionBackground": "#B5BC3859",
+		"editor.selectionHighlightBackground": "#B5BC3833",
+		"editor.findMatchBackground": "#DC66214D",
+		"editor.findMatchHighlightBackground": "#B5BC3859",
+
+		"list.activeSelectionBackground": "#B5BC38",
+		"list.activeSelectionForeground": "#000000",
+		"list.inactiveSelectionBackground": "#EDEDED",
+		"list.hoverBackground": "#F2F2F2",
+		"list.highlightForeground": "#8A9029",
+
+		"inputOption.activeBorder": "#B5BC38",
+		"inputOption.activeBackground": "#B5BC3833",
+		"inputValidation.errorBorder": "#DC6621",
+
+		"pickerGroup.foreground": "#8A9029",
+		"peekViewTitle.background": "#F0F0F0",
+		"peekViewResult.selectionBackground": "#B5BC3859",
+
+		"notificationLink.foreground": "#8A9029",
+		"gitDecoration.modifiedResourceForeground": "#8A9029",
+		"gitDecoration.untrackedResourceForeground": "#DC6621",
+
+		"terminal.ansiGreen": "#8A9029",
+		"terminal.ansiYellow": "#DC6621",
+
+		"selection.background": "#B5BC3859",
+		"scrollbarSlider.activeBackground": "#B5BC3899"
+	}
+}

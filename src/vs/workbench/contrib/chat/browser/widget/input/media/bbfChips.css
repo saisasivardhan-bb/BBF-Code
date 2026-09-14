@@ -1,0 +1,22 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Blackbox Factories. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* The Deep Reasoning chip is a toggle, so its two states must read at a glance:
+   on takes the active input-option colours, off sits back like a disabled option. */
+.interactive-session .chat-secondary-toolbar .bbf-toggle-chip .action-label.checked {
+	background-color: var(--vscode-inputOption-activeBackground);
+	color: var(--vscode-inputOption-activeForeground);
+	outline: 1px solid var(--vscode-inputOption-activeBorder);
+	outline-offset: -1px;
+	padding: 2px;
+}
+
+.interactive-session .chat-secondary-toolbar .bbf-toggle-chip .action-label:not(.checked) {
+	opacity: 0.7;
+}
+
+.interactive-session .chat-secondary-toolbar .bbf-toggle-chip .action-label:not(.checked):hover {
+	opacity: 1;
+}

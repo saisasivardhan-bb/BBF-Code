@@ -1,0 +1,13 @@
+Package: @@NAME@@
+Version: @@VERSION@@
+Section: devel
+Depends: @@DEPENDS@@
+Recommends: @@RECOMMENDS@@
+Priority: optional
+Architecture: @@ARCHITECTURE@@
+Maintainer: Blackbox Factories <support@blackboxfactories.com>
+Homepage: https://blackboxfactories.com
+Installed-Size: @@INSTALLEDSIZE@@
+Description: Code editing. Redefined.
+ BBF Code combines the simplicity of a code editor with what developers need
+ for the core edit-build-debug cycle.
