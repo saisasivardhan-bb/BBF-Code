@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Download BBF Code</title>
+	<meta name="description" content="BBF Code — the Blackbox Factories code editor, with BBF AI Coder built in. Download for Windows, Linux and macOS.">
+	<link rel="icon" href="favicon.svg" type="image/svg+xml">
+	<style>
+		/* Brand: the sign-in gate's own palette, so the site and the product
+		   read as one thing. */
+		:root {
+			--bbf-olive: #B5BC38;
+			--bbf-orange: #DC6621;
+			--ground: #1A1A1A;
+			--raised: #232323;
+			--line: #333333;
+			--text: #E6E6E6;
+			--muted: #9A9A9A;
+			--radius: 10px;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		html {
+			color-scheme: dark;
+		}
+
+		body {
+			margin: 0;
+			padding-block: 0;
+			background: var(--ground);
+			color: var(--text);
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+			font-size: 16px;
+			line-height: 1.55;
+			-webkit-font-smoothing: antialiased;
+		}
+
+		a {
+			color: var(--bbf-olive);
+		}
+
+		.wrap {
+			max-width: 1080px;
+			margin-inline: auto;
+			padding-inline: 20px;
+		}
+
+		/* ---- Masthead ---------------------------------------------------- */
+
+		header {
+			text-align: center;
+			padding-block: 56px 12px;
+		}
+
+		.mark {
+			width: 104px;
+			height: auto;
+			display: block;
+			margin: 0 auto 22px;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: clamp(30px, 5vw, 44px);
+			font-weight: 900;
+			letter-spacing: -0.5px;
+		}
+
+		.tagline {
+			margin: 12px auto 0;
+			max-width: 46rem;
+			color: var(--muted);
+			font-size: clamp(15px, 2vw, 18px);
+		}
+
+		.release-line {
+			margin-top: 18px;
+			font-size: 13px;
+			color: var(--muted);
+		}
+
+		.release-line strong {
+			color: var(--text);
+			font-weight: 600;
+		}
+
+		/* ---- Platform cards ---------------------------------------------- */
+
+		.platforms {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 20px;
+			margin-block: 40px 8px;
+		}
+
+		@media (max-width: 860px) {
+			.platforms {
+				grid-template-columns: 1fr;
+				max-width: 26rem;
+				margin-inline: auto;
+			}
+		}
+
+		.card {
+			position: relative;
+			background: var(--raised);
+			border: 1px solid var(--line);
+			border-radius: var(--radius);
+			padding: 28px 22px 24px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+		}
+
+		.card[data-recommended="true"] {
+			border-color: var(--bbf-olive);
+		}
+
+		.badge {
+			position: absolute;
+			top: -11px;
+			left: 50%;
+			transform: translateX(-50%);
+			white-space: nowrap;
+			background: var(--bbf-olive);
+			color: #000;
+			font-size: 11px;
+			font-weight: 700;
+			letter-spacing: 0.3px;
+			text-transform: uppercase;
+			padding: 3px 10px;
+			border-radius: 999px;
+			display: none;
+		}
+
+		.card[data-recommended="true"] .badge {
+			display: block;
+		}
+
+		.os-icon {
+			width: 46px;
+			height: 46px;
+			margin-bottom: 14px;
+			fill: var(--text);
+		}
+
+		.os-name {
+			font-size: 19px;
+			font-weight: 700;
+			margin: 0;
+		}
+
+		.os-support {
+			margin: 4px 0 20px;
+			font-size: 13px;
+			color: var(--muted);
+			min-height: 2.6em;
+		}
+
+		.download {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 9px;
+			width: 100%;
+			padding: 13px 18px;
+			border-radius: 6px;
+			background: var(--bbf-olive);
+			color: #000;
+			font-size: 15px;
+			font-weight: 700;
+			text-decoration: none;
+			transition: background 120ms ease;
+		}
+
+		.download:hover,
+		.download:focus-visible {
+			background: var(--bbf-orange);
+			color: #fff;
+		}
+
+		.download .size {
+			font-weight: 500;
+			opacity: 0.72;
+			font-size: 13px;
+		}
+
+		.alternatives {
+			margin: 16px 0 0;
+			padding: 0;
+			list-style: none;
+			width: 100%;
+			font-size: 14px;
+			border-top: 1px solid var(--line);
+		}
+
+		.alternatives li {
+			display: flex;
+			justify-content: space-between;
+			align-items: baseline;
+			gap: 10px;
+			padding-top: 10px;
+			margin-top: 10px;
+		}
+
+		.alternatives li:first-child {
+			margin-top: 12px;
+		}
+
+		.alternatives a {
+			text-decoration: none;
+			font-weight: 600;
+		}
+
+		.alternatives a:hover,
+		.alternatives a:focus-visible {
+			color: var(--bbf-orange);
+			text-decoration: underline;
+		}
+
+		.alternatives .size {
+			color: var(--muted);
+			font-size: 12px;
+			font-variant-numeric: tabular-nums;
+		}
+
+		/* ---- Notes ------------------------------------------------------- */
+
+		.notes {
+			margin-block: 46px;
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+			gap: 18px;
+		}
+
+		.note {
+			background: var(--raised);
+			border: 1px solid var(--line);
+			border-left: 3px solid var(--bbf-orange);
+			border-radius: var(--radius);
+			padding: 18px 20px;
+		}
+
+		.note h3 {
+			margin: 0 0 8px;
+			font-size: 15px;
+			font-weight: 700;
+		}
+
+		.note p {
+			margin: 0;
+			font-size: 14px;
+			color: var(--muted);
+		}
+
+		.note code {
+			background: #2C2C2C;
+			border-radius: 4px;
+			padding: 1px 5px;
+			font-size: 12.5px;
+			color: var(--text);
+			overflow-wrap: anywhere;
+		}
+
+		/* ---- Footer ------------------------------------------------------ */
+
+		footer {
+			border-top: 1px solid var(--line);
+			padding-block: 26px 46px;
+			text-align: center;
+			font-size: 13px;
+			color: var(--muted);
+		}
+
+		footer p {
+			margin: 6px 0;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="wrap">
+		<header>
+			<svg class="mark" viewBox="0 0 240 170" aria-hidden="true">
+				<polygon fill="#B5BC38"
+					points="0 81.92 81.96 163.87 152.05 163.87 70.1 81.92 152.05 0 81.96 0 0 81.92" />
+				<polygon fill="#DC6621"
+					points="141.6 81.92 223.56 163.87 234.36 163.87 152.4 81.92 234.36 0 223.56 0 141.6 81.92" />
+			</svg>
+			<h1>Download BBF Code</h1>
+			<p class="tagline">The Blackbox Factories code editor, with BBF AI Coder built in. Sign in with your
+				Blackbox Factories Google account and start working.</p>
+			<p class="release-line">Version <strong id="version">1.139.0</strong><span id="released"></span></p>
+		</header>
+
+		<main>
+			<section class="platforms" aria-label="Downloads by operating system">
+
+				<article class="card" id="card-windows">
+					<span class="badge">Recommended for your device</span>
+					<svg class="os-icon" viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M3 5.5 10 4.4v7.1H3V5.5Zm0 13 7 1.1v-7H3v5.9Zm8 1.2 10 1.5v-8.7H11v7.2Zm0-15.4v7.2h10V3l-10 1.3Z" />
+					</svg>
+					<h2 class="os-name">Windows</h2>
+					<p class="os-support">Windows 10, 11 &middot; 64-bit</p>
+					<a class="download" id="win-user" href="https://github.com/saisasivardhan-bb/BBF-Code/releases/latest/download/BBFCodeUserSetup-x64-1.139.0.exe">
+						Download <span class="size" data-size-for="win-user">194 MB</span>
+					</a>
+					<ul class="alternatives">
+						<li>
+							<a id="win-system" href="https://github.com/saisasivardhan-bb/BBF-Code/releases/latest/download/BBFCodeSetup-x64-1.139.0.exe">System installer</a>
+							<span class="size" data-size-for="win-system">194 MB</span>
+						</li>
+					</ul>
+				</article>
+
+				<article class="card" id="card-linux">
+					<span class="badge">Recommended for your device</span>
+					<svg class="os-icon" viewBox="0 0 24 24" aria-hidden="true">
+						<ellipse cx="9.5" cy="20.2" rx="2.1" ry="1" fill="#DC6621" />
+						<ellipse cx="14.5" cy="20.2" rx="2.1" ry="1" fill="#DC6621" />
+						<path
+							d="M12 2.4c-2.1 0-3.5 1.6-3.5 3.9 0 .9 0 1.5-.4 2.3-.5 1-1.5 2.2-2.3 3.7-.8 1.5-1.4 3-1.2 4.2.1.8.5 1.4 1.2 1.6.6.2 1.2 0 1.8-.5.3 1.3 2 2.2 4.4 2.2s4.1-.9 4.4-2.2c.6.5 1.2.7 1.8.5.7-.2 1.1-.8 1.2-1.6.2-1.2-.4-2.7-1.2-4.2-.8-1.5-1.8-2.7-2.3-3.7-.4-.8-.4-1.4-.4-2.3 0-2.3-1.4-3.9-3.5-3.9Z" />
+						<circle cx="10.4" cy="6.6" r=".95" fill="#1A1A1A" />
+						<circle cx="13.6" cy="6.6" r=".95" fill="#1A1A1A" />
+						<path d="M12 7.6 13.7 8.8 12 10 10.3 8.8Z" fill="#DC6621" />
+					</svg>
+					<h2 class="os-name">Linux</h2>
+					<p class="os-support">Ubuntu 22.04+, Debian 12+, RHEL 9+ &middot; x64</p>
+					<a class="download" id="linux-deb" href="https://github.com/saisasivardhan-bb/BBF-Code/releases/latest/download/bbf-code-linux-x64-1.139.0.deb">
+						Download .deb <span class="size" data-size-for="linux-deb">189 MB</span>
+					</a>
+					<ul class="alternatives">
+						<li>
+							<a id="linux-rpm" href="https://github.com/saisasivardhan-bb/BBF-Code/releases/latest/download/bbf-code-linux-x64-1.139.0.rpm">.rpm</a>
+							<span class="size" data-size-for="linux-rpm">267 MB</span>
+						</li>
+						<li>
+							<a id="linux-targz" href="https://github.com/saisasivardhan-bb/BBF-Code/releases/latest/download/bbf-code-linux-x64-1.139.0.tar.gz">.tar.gz (any distro)</a>
+							<span class="size" data-size-for="linux-targz">258 MB</span>
+						</li>
+					</ul>
+				</article>
+
+				<article class="card" id="card-mac">
+					<span class="badge">Recommended for your device</span>
+					<svg class="os-icon" viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M16.3 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9s-1.8-.9-3-.8c-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.8 1.1 9 .8 1.1 1.7 2.3 2.9 2.2 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-1.1 2.8-2.2c.9-1.2 1.2-2.4 1.2-2.5 0-.1-2.4-1-2.4-3.6ZM14 5.2c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1 2.9 1 .1 2.1-.5 2.8-1.3Z" />
+					</svg>
+					<h2 class="os-name">macOS</h2>
+					<p class="os-support">macOS 12+ &middot; Apple silicon (M1 and later)</p>
+					<a class="download" id="mac-dmg" href="https://github.com/saisasivardhan-bb/BBF-Code/releases/latest/download/BBFCode-darwin-arm64-1.139.0.dmg">
+						Download .dmg <span class="size" data-size-for="mac-dmg">290 MB</span>
+					</a>
+					<ul class="alternatives">
+						<li>
+							<a id="mac-zip" href="https://github.com/saisasivardhan-bb/BBF-Code/releases/latest/download/BBFCode-darwin-arm64-1.139.0.zip">.zip</a>
+							<span class="size" data-size-for="mac-zip">240 MB</span>
+						</li>
+					</ul>
+				</article>
+
+			</section>
+
+			<section class="notes" aria-label="Before you install">
+				<div class="note">
+					<h3>Windows shows a warning</h3>
+					<p>BBF Code is not code-signed yet, so SmartScreen says &ldquo;Windows protected your PC&rdquo;.
+						Choose <strong>More info</strong>, then <strong>Run anyway</strong>.</p>
+				</div>
+				<div class="note">
+					<h3>macOS blocks the first launch</h3>
+					<p>The app is not notarized yet. Right-click <strong>BBF Code</strong> in Applications and choose
+						<strong>Open</strong>, or run <code>xattr -dr com.apple.quarantine "/Applications/BBF Code.app"</code>.</p>
+				</div>
+				<div class="note">
+					<h3>Older Linux distributions</h3>
+					<p>The <code>.deb</code> and <code>.rpm</code> need glibc&nbsp;2.34 and OpenSSL&nbsp;3. On anything
+						older, use the <code>.tar.gz</code>, which carries no such requirement.</p>
+				</div>
+				<div class="note">
+					<h3>You need a company account</h3>
+					<p>BBF Code asks you to sign in with your Blackbox Factories Google account before the editor
+						opens. The AI Coder needs it too.</p>
+				</div>
+			</section>
+		</main>
+
+		<footer>
+			<p><a id="all-releases" href="https://github.com/saisasivardhan-bb/BBF-Code/releases">All releases and
+					release notes</a></p>
+			<p>&copy; 2026 QED Black Box Factories Pvt. Ltd.</p>
+		</footer>
+	</div>
+
+	<script>
+		// The page works as plain HTML: every link already points at the latest
+		// release. What follows only improves it -- real file sizes, the version
+		// actually published, and the card for the visitor's own system.
+		(function () {
+			'use strict';
+
+			const REPO = 'saisasivardhan-bb/BBF-Code';
+
+			/** Which asset fills which link, matched on the parts of a name that survive a version bump. */
+			const ASSETS = [
+				{ id: 'win-user', match: n => /usersetup/i.test(n) && n.endsWith('.exe') },
+				{ id: 'win-system', match: n => /^bbfcodesetup/i.test(n) && n.endsWith('.exe') },
+				{ id: 'linux-deb', match: n => n.endsWith('.deb') },
+				{ id: 'linux-rpm', match: n => n.endsWith('.rpm') },
+				{ id: 'linux-targz', match: n => n.endsWith('.tar.gz') },
+				{ id: 'mac-dmg', match: n => n.endsWith('.dmg') },
+				{ id: 'mac-zip', match: n => /darwin/i.test(n) && n.endsWith('.zip') }
+			];
+
+			function formatSize(bytes) {
+				return (bytes / 1048576).toFixed(0) + ' MB';
+			}
+
+			function recommendCard() {
+				const ua = navigator.userAgent;
+				const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
+				const haystack = (platform + ' ' + ua).toLowerCase();
+				let id;
+				if (haystack.includes('win')) {
+					id = 'card-windows';
+				} else if (haystack.includes('mac') || haystack.includes('iphone') || haystack.includes('ipad')) {
+					id = 'card-mac';
+				} else if (haystack.includes('linux') || haystack.includes('android') || haystack.includes('x11')) {
+					id = 'card-linux';
+				}
+				const card = id && document.getElementById(id);
+				if (card) {
+					card.dataset.recommended = 'true';
+				}
+			}
+
+			async function describeLatestRelease() {
+				const response = await fetch('https://api.github.com/repos/' + REPO + '/releases/latest', {
+					headers: { Accept: 'application/vnd.github+json' }
+				});
+				if (!response.ok) {
+					return;
+				}
+				const release = await response.json();
+				const assets = release.assets || [];
+
+				for (const { id, match } of ASSETS) {
+					const asset = assets.find(a => match(a.name));
+					const link = document.getElementById(id);
+					if (!asset || !link) {
+						continue;
+					}
+					link.href = asset.browser_download_url;
+					const size = document.querySelector('[data-size-for="' + id + '"]');
+					if (size) {
+						size.textContent = formatSize(asset.size);
+					}
+				}
+
+				const version = (release.tag_name || '').replace(/^v/, '');
+				if (version) {
+					document.getElementById('version').textContent = version;
+				}
+				if (release.published_at) {
+					const when = new Date(release.published_at).toLocaleDateString(undefined, {
+						year: 'numeric', month: 'long', day: 'numeric'
+					});
+					document.getElementById('released').textContent = ' · released ' + when;
+				}
+			}
+
+			recommendCard();
+			// A failure here leaves the static links and the page intact, which is
+			// the point of not generating them.
+			describeLatestRelease().catch(() => { });
+		}());
+	</script>
+</body>
+
+</html>

@@ -1,0 +1,40 @@
+name: Download page
+
+# Publishes BBF-Code/ (the download page) to GitHub Pages.
+# The page reads the latest release from the GitHub API at load time, so a new
+# release appears on it without another deployment; this runs only when the
+# page's own files change, or when started by hand.
+
+on:
+  push:
+    branches: [main]
+    paths: ['BBF-Code/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# A release in flight should not be interrupted by a page deployment.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: BBF-Code
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
