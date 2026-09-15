@@ -45,7 +45,7 @@ jobs:
         shell: bash
         working-directory: bbf-ai-engine
         run: |
-          bun install
+          bun install --filter opencode
           cd packages/opencode
           bun run script/build.ts --single --skip-install --skip-embed-web-ui
           ls -la dist/opencode-windows-x64/bin
@@ -139,7 +139,7 @@ jobs:
       - name: Build engine (opencode-linux-x64)
         working-directory: bbf-ai-engine
         run: |
-          bun install
+          bun install --filter opencode
           cd packages/opencode
           bun run script/build.ts --single --skip-install --skip-embed-web-ui
           ls -la dist/opencode-linux-x64/bin
@@ -231,7 +231,7 @@ jobs:
       - name: Build engine (opencode-darwin-arm64)
         working-directory: bbf-ai-engine
         run: |
-          bun install
+          bun install --filter opencode
           cd packages/opencode
           bun run script/build.ts --single --skip-install --skip-embed-web-ui
           ls -la dist/opencode-darwin-arm64/bin
