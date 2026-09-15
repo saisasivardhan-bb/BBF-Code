@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 /**
  * Configuration, read from the environment.
  *
- * The GitHub token never leaves this process: BBF Code talks to this server,
+ * The GitHub token never leaves this process: BlackBox Code talks to this server,
  * and this server is the only thing that talks to GitHub.
  */
 
@@ -59,7 +59,7 @@ export const config = {
 	},
 
 	/**
-	 * Shared secret BBF Code sends as `Authorization: Bearer <token>`.
+	 * Shared secret BlackBox Code sends as `Authorization: Bearer <token>`.
 	 * Optional, but without it the feed is readable by anyone who can reach it.
 	 */
 	get apiToken() {
@@ -69,7 +69,7 @@ export const config = {
 	/**
 	 * The company OpenCode Zen key.
 	 *
-	 * This is the one credential that must never reach a client. BBF Code is
+	 * This is the one credential that must never reach a client. BlackBox Code is
 	 * given a short-lived session token instead and talks to the proxy below;
 	 * only this process ever puts this value on the wire to Zen. It is read
 	 * through a getter so it is never enumerable on the config object, and it

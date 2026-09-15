@@ -130,7 +130,7 @@ function startLoopbackServer(expectedState: string): Promise<{
 
 			const reply = (message: string) => {
 				res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-				res.end(`<!doctype html><meta charset="utf-8"><title>BBF Code</title>
+				res.end(`<!doctype html><meta charset="utf-8"><title>BlackBox Code</title>
 <body style="font-family:system-ui;background:#fff;color:#5D5D5D;display:grid;place-items:center;height:100vh;margin:0">
 <div style="text-align:center"><div style="font-weight:900;color:#000;letter-spacing:.02em">BBF CODE</div>
 <p>${message}</p><p style="font-style:italic;font-size:13px">You can close this tab.</p></div>`);
@@ -152,7 +152,7 @@ function startLoopbackServer(expectedState: string): Promise<{
 				settle.reject(new Error('Google did not return an authorization code.'));
 				return;
 			}
-			reply('Signed in. Return to BBF Code.');
+			reply('Signed in. Return to BlackBox Code.');
 			settle.resolve(code);
 		});
 

@@ -70,7 +70,7 @@ export function activate(context: vscode.ExtensionContext): void {
 		const credential = await access.acquire({ interactive: true });
 		if (!credential) {
 			stream.markdown(vscode.l10n.t(
-				'Sign in to BBF Code with your Blackbox Factories Google account to use BBF AI Coder.'));
+				'Sign in to BlackBox Code with your Blackbox Factories Google account to use BBF AI Coder.'));
 			return {};
 		}
 

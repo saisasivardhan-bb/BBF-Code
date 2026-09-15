@@ -9,7 +9,7 @@ import { GOOGLE_PROVIDER_ID, GOOGLE_SCOPES, serviceUrl } from './config.js';
 /**
  * Access to BBF AI Coder.
  *
- * There is no separate sign-in. Whoever is already signed into BBF Code with
+ * There is no separate sign-in. Whoever is already signed into BlackBox Code with
  * their Blackbox Factories Google account can use AI Coder, because that Google
  * identity is what the backend checks.
  *

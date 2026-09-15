@@ -1,6 +1,6 @@
 name: Release
 
-# Builds BBF Code installers for Windows, Linux and macOS and attaches them to a
+# Builds BlackBox Code installers for Windows, Linux and macOS and attaches them to a
 # GitHub Release.
 #
 # Each job builds the BBF AI Coder engine natively with bun from bbf-ai-engine/
@@ -104,8 +104,8 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           mkdir -p dist-release
-          cp .build/win32-x64/user-setup/BBFCodeSetup.exe   "dist-release/BBFCodeUserSetup-x64-$VERSION.exe"
-          cp .build/win32-x64/system-setup/BBFCodeSetup.exe "dist-release/BBFCodeSetup-x64-$VERSION.exe"
+          cp .build/win32-x64/user-setup/BlackBoxCodeSetup.exe   "dist-release/BlackBoxCodeUserSetup-x64-$VERSION.exe"
+          cp .build/win32-x64/system-setup/BlackBoxCodeSetup.exe "dist-release/BlackBoxCodeSetup-x64-$VERSION.exe"
           ls -la dist-release
 
       - uses: actions/upload-artifact@v4
@@ -162,7 +162,7 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           mkdir -p dist-release
-          tar -czf "dist-release/bbf-code-linux-x64-$VERSION.tar.gz" -C .. VSCode-linux-x64
+          tar -czf "dist-release/blackbox-code-linux-x64-$VERSION.tar.gz" -C .. VSCode-linux-x64
 
       # deb and rpm compute their shared-library dependencies by reading every
       # binary in the package, the tunnel CLI included
@@ -203,8 +203,8 @@ jobs:
       - name: Collect
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          cp .build/linux/deb/amd64/deb/*.deb "dist-release/bbf-code-linux-x64-$VERSION.deb" 2>/dev/null || echo "no deb produced (CLI: ${{ steps.cli.outcome }}, deb: ${{ steps.deb.outcome }})"
-          cp .build/linux/rpm/x86_64/rpmbuild/RPMS/x86_64/*.rpm "dist-release/bbf-code-linux-x64-$VERSION.rpm" 2>/dev/null || echo "no rpm produced (rpm: ${{ steps.rpm.outcome }})"
+          cp .build/linux/deb/amd64/deb/*.deb "dist-release/blackbox-code-linux-x64-$VERSION.deb" 2>/dev/null || echo "no deb produced (CLI: ${{ steps.cli.outcome }}, deb: ${{ steps.deb.outcome }})"
+          cp .build/linux/rpm/x86_64/rpmbuild/RPMS/x86_64/*.rpm "dist-release/blackbox-code-linux-x64-$VERSION.rpm" 2>/dev/null || echo "no rpm produced (rpm: ${{ steps.rpm.outcome }})"
           ls -la dist-release
 
       - uses: actions/upload-artifact@v4
@@ -244,7 +244,7 @@ jobs:
 
       - name: Add engine to package
         run: |
-          APP="../VSCode-darwin-arm64/BBF Code.app"
+          APP="../VSCode-darwin-arm64/BlackBox Code.app"
           mkdir -p "$APP/Contents/Resources/app/bin"
           cp bbf-ai-engine/packages/opencode/dist/opencode-darwin-arm64/bin/opencode "$APP/Contents/Resources/app/bin/opencode"
           chmod +x "$APP/Contents/Resources/app/bin/opencode"
@@ -256,8 +256,8 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           mkdir -p dist-release
-          (cd ../VSCode-darwin-arm64 && ditto -c -k --keepParent "BBF Code.app" "$GITHUB_WORKSPACE/dist-release/BBFCode-darwin-arm64-$VERSION.zip")
-          hdiutil create -volname "BBF Code" -srcfolder "../VSCode-darwin-arm64/BBF Code.app" -ov -format UDZO "dist-release/BBFCode-darwin-arm64-$VERSION.dmg"
+          (cd ../VSCode-darwin-arm64 && ditto -c -k --keepParent "BlackBox Code.app" "$GITHUB_WORKSPACE/dist-release/BlackBoxCode-darwin-arm64-$VERSION.zip")
+          hdiutil create -volname "BlackBox Code" -srcfolder "../VSCode-darwin-arm64/BlackBox Code.app" -ov -format UDZO "dist-release/BlackBoxCode-darwin-arm64-$VERSION.dmg"
           ls -la dist-release
 
       - uses: actions/upload-artifact@v4
@@ -283,6 +283,6 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           draft: true
-          name: BBF Code ${{ github.ref_name }}
+          name: BlackBox Code ${{ github.ref_name }}
           files: assets/*
           fail_on_unmatched_files: true

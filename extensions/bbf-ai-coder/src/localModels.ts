@@ -8,7 +8,7 @@ import { localAiContextLength, localAiUrl } from './config.js';
 /**
  * Models served from this machine.
  *
- * Ollama is the only local runtime BBF Code discovers today. It is reached in
+ * Ollama is the only local runtime BlackBox Code discovers today. It is reached in
  * two ways on purpose: `/api/tags` is asked for the catalogue because it is the
  * only endpoint that reports context length and whether a model can call tools,
  * and `/v1` is used for the requests themselves because it is OpenAI-compatible,

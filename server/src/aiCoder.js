@@ -7,7 +7,7 @@ import { config } from './config.js';
 /**
  * AI Coder access.
  *
- * The company OpenCode Zen key lives in this process and nowhere else. BBF Code
+ * The company OpenCode Zen key lives in this process and nowhere else. BlackBox Code
  * never receives it, so a decompiled .vsix, a stray log line, or a stolen laptop
  * cannot leak it -- which matters more for a shared key than a personal one,
  * because a single leak would affect everyone at once.
@@ -19,7 +19,7 @@ import { config } from './config.js';
  *   ALL  /ai-coder/zen/v1/*  Proxy to Zen, swapping the caller's session token
  *                            for the real key on the way out.
  *
- * The engine BBF Code runs locally is pointed at the proxy, so its model traffic
+ * The engine BlackBox Code runs locally is pointed at the proxy, so its model traffic
  * flows through here and the key stays server-side.
  */
 
@@ -125,7 +125,7 @@ function requireSession(req, res, next) {
 		if (session) {
 			sessions.delete(token);
 		}
-		// 401 tells BBF Code to exchange its Google session again, which it does
+		// 401 tells BlackBox Code to exchange its Google session again, which it does
 		// silently, so an expired token is invisible to the user.
 		return res.status(401).json({ error: 'Session expired. Sign in again.' });
 	}
@@ -152,7 +152,7 @@ export function createAiCoderRouter() {
 
 		const googleToken = readBearer(req);
 		if (!googleToken) {
-			return res.status(401).json({ error: 'Sign in to BBF Code with your Google account first.' });
+			return res.status(401).json({ error: 'Sign in to BlackBox Code with your Google account first.' });
 		}
 
 		try {

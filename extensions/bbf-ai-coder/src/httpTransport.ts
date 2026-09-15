@@ -65,7 +65,7 @@ export class HttpEngineTransport implements IEngineTransport {
 		}
 		const credential = await this.access.acquire({ interactive: true });
 		if (!credential) {
-			throw new Error('Sign in to BBF Code with your Blackbox Factories Google account to use BBF AI Coder.');
+			throw new Error('Sign in to BlackBox Code with your Blackbox Factories Google account to use BBF AI Coder.');
 		}
 		// The local catalogue is resolved here rather than inside the engine so
 		// the picker and the engine are offered exactly the same list. It is
@@ -268,7 +268,7 @@ export class HttpEngineTransport implements IEngineTransport {
 
 		if (tokenRejected) {
 			if (retried) {
-				onEvent({ kind: 'error', message: vscode.l10n.t('The BBF server no longer accepts this session. Sign out of BBF Code and sign in again.') });
+				onEvent({ kind: 'error', message: vscode.l10n.t('The BBF server no longer accepts this session. Sign out of BlackBox Code and sign in again.') });
 				return;
 			}
 			// The engine session itself lives in the engine's storage and survives

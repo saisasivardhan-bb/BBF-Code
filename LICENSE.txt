@@ -1,4 +1,4 @@
-BBF Code License
+BlackBox Code License
 
 Copyright (c) 2026 - present QED Black Box Factories Pvt. Ltd.
 

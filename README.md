@@ -1,6 +1,6 @@
-# BBF Code
+# BlackBox Code
 
-BBF Code is the Blackbox Factories code editor: a branded distribution of the
+BlackBox Code is the Blackbox Factories code editor: a branded distribution of the
 [Code - OSS](https://github.com/microsoft/vscode) editor with our own identity,
 extension feed, themes, and sign-in.
 
@@ -33,7 +33,7 @@ Engineering guidelines, instructions, and skills live in [`.agents/`](.agents/).
 
 ## Licensing
 
-BBF Code is derived from Code - OSS, which is distributed under the MIT license.
+BlackBox Code is derived from Code - OSS, which is distributed under the MIT license.
 That license and its copyright notice are retained in [LICENSE.txt](LICENSE.txt),
 and the notices for bundled third-party components are retained in
 [ThirdPartyNotices.txt](ThirdPartyNotices.txt). Both must ship with the product:

@@ -276,7 +276,7 @@ const EFFORT_VARIANTS = [
  *
  * `question` is the engine's tool for putting a multiple-choice question to the
  * user mid-turn. The chat UI has nothing to answer it with, so a turn that
- * called it would wait forever. The engine build shipped with BBF Code already
+ * called it would wait forever. The engine build shipped with BlackBox Code already
  * leaves the tool denied for its agents (see `plugin/agent.ts` there); this
  * entry keeps the two in agreement should the agent defaults ever change.
  *

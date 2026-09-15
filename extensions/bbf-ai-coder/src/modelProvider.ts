@@ -98,7 +98,7 @@ export class BbfModelProvider implements vscode.LanguageModelChatProvider {
 	): Promise<void> {
 		const credential = await this.access.acquire({ interactive: true });
 		if (!credential) {
-			throw new Error('Sign in to BBF Code with your Blackbox Factories Google account to use BBF AI Coder.');
+			throw new Error('Sign in to BlackBox Code with your Blackbox Factories Google account to use BBF AI Coder.');
 		}
 
 		const controller = new AbortController();
@@ -237,7 +237,7 @@ export class BbfLocalModelProvider implements vscode.LanguageModelChatProvider {
 				this._onDidChange.fire();
 			}
 		});
-		// The runtime starts, stops and pulls models independently of BBF Code,
+		// The runtime starts, stops and pulls models independently of BlackBox Code,
 		// and the picker never asks twice on its own. A localhost check every so
 		// often keeps the list honest without a restart.
 		this.runtimeCheck = setInterval(() => void this.checkRuntime(), LOCAL_RUNTIME_CHECK_MS);

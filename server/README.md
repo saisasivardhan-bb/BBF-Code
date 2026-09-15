@@ -1,6 +1,6 @@
-# BBF Code — Proprietary Extension Feed
+# BlackBox Code — Proprietary Extension Feed
 
-Serves BBF's private `.vsix` extensions to BBF Code from **authenticated GitHub
+Serves BBF's private `.vsix` extensions to BlackBox Code from **authenticated GitHub
 Releases**, and nothing else. Public extensions keep coming from Open VSX; this
 feed only ever updates extensions listed in **BBF Proprietary Extensions**.
 
@@ -10,11 +10,11 @@ versions to keep in sync.
 
 ## Why a server at all
 
-VS Code supports exactly one extension gallery, and BBF Code already points its
+VS Code supports exactly one extension gallery, and BlackBox Code already points its
 gallery at Open VSX. A second gallery is not possible, so BBF extensions travel
 over their own channel instead — this one.
 
-The GitHub token stays on the server. BBF Code talks to the server; the server
+The GitHub token stays on the server. BlackBox Code talks to the server; the server
 talks to GitHub. Clients never see repository credentials.
 
 ## Setup
@@ -36,7 +36,7 @@ npm start
 | `REFRESH_SECONDS` | no | Release metadata cache lifetime, default `300` |
 | `LOCAL_VSIX_DIR` | no | Serve `.vsix` from a directory instead of GitHub (dev / air-gapped) |
 
-Point BBF Code at it by adding to `product.json`:
+Point BlackBox Code at it by adding to `product.json`:
 
 ```json
 "bbfExtensionsServiceUrl": "https://extensions.blackboxfactories.com"
@@ -48,7 +48,7 @@ Point BBF Code at it by adding to `product.json`:
 2. Create or edit a release in `GITHUB_REPO`.
 3. Attach the `.vsix` as a release asset.
 
-Within `REFRESH_SECONDS` it appears in the feed and in BBF Code's **BBF
+Within `REFRESH_SECONDS` it appears in the feed and in BlackBox Code's **BBF
 Proprietary Extensions** section. Version, name, description and icon all come
 from inside the `.vsix`.
 
@@ -63,7 +63,7 @@ Notes:
 | Endpoint | Purpose |
 |---|---|
 | `GET /api/health` | Credential and connectivity check |
-| `GET /api/extensions` | The catalog BBF Code polls |
+| `GET /api/extensions` | The catalog BlackBox Code polls |
 | `GET /api/extensions/:id/:version/vsix` | Streams the `.vsix` (token proxied server-side) |
 | `GET /api/extensions/:id/:version/icon` | Extension icon, extracted from the `.vsix` |
 

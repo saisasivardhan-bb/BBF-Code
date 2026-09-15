@@ -5,7 +5,7 @@ import { getCatalog, getIcon, refresh } from './store.js';
  * VS Code extension gallery API, implemented over the BBF catalog and proxied
  * to Open VSX for everything else.
  *
- * BBF Code can only point at one gallery, so this server becomes that gallery:
+ * BlackBox Code can only point at one gallery, so this server becomes that gallery:
  * BBF extensions are served from GitHub Releases, and every other extension is
  * forwarded upstream. The payoff is that BBF extensions become ordinary gallery
  * extensions — listed whether installed or not, with native install, update and

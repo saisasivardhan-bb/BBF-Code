@@ -54,7 +54,7 @@ class GoogleAuthenticationProvider implements vscode.AuthenticationProvider, vsc
 		if (!clientId) {
 			// Misconfigured build rather than user error, so say so plainly.
 			await vscode.window.showErrorMessage(vscode.l10n.t(
-				'This build of BBF Code has no Google OAuth client configured. Set googleClientId in extensions/bbf-google-auth/src/config.ts and rebuild.'));
+				'This build of BlackBox Code has no Google OAuth client configured. Set googleClientId in extensions/bbf-google-auth/src/config.ts and rebuild.'));
 			throw new Error('No Google OAuth client configured in this build.');
 		}
 

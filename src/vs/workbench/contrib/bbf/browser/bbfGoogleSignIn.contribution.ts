@@ -43,7 +43,7 @@ class BBFGoogleSignInAction extends Action2 {
 
 		try {
 			const session = await authenticationService.createSession(BBF_GOOGLE_PROVIDER_ID, SCOPES);
-			notificationService.info(localize('bbfSignedIn', "Signed in to BBF Code as {0}.", session.account.label));
+			notificationService.info(localize('bbfSignedIn', "Signed in to BlackBox Code as {0}.", session.account.label));
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
 			// Covers the two expected refusals: an account outside the allowed
