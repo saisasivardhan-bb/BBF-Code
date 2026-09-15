@@ -594,7 +594,17 @@ function readCookie(name: string): string | undefined {
 	const cookies = document.cookie.split('; ');
 	for (const cookie of cookies) {
 		if (cookie.startsWith(name + '=')) {
-			return cookie.substring(name.length + 1);
+			const value = cookie.substring(name.length + 1);
+			try {
+				// `Set-Cookie` percent-encodes the value, so a path arrives as
+				// `%2Foss-dev%2Fsecret-key`. Used as written it is one opaque
+				// segment rather than a path, and the request lands nowhere --
+				// which left the workbench unable to reach its secret key at all.
+				// A value that was never encoded survives this unchanged.
+				return decodeURIComponent(value);
+			} catch {
+				return value; // a stray '%' is not an escape; take it literally
+			}
 		}
 	}
 

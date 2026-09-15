@@ -82,7 +82,11 @@ export async function authorize(clientId: string, clientSecret: string, allowedD
 	const challenge = base64url(crypto.createHash('sha256').update(verifier).digest());
 	const state = base64url(crypto.randomBytes(16));
 
-	const { server, redirectUri, codePromise } = await startLoopbackServer(state);
+	const { server, loopbackUri, state: routedState, codePromise } = await startLoopbackServer(state);
+	// Where Google is told to send the answer. On the desktop that is the
+	// loopback listener itself; hosted, it is this server's fixed callback,
+	// which passes the answer on to that listener (see webClientServer.ts).
+	const redirectUri = await resolveRedirect(loopbackUri);
 
 	const url = new URL(AUTH_ENDPOINT);
 	url.searchParams.set('client_id', clientId);
@@ -91,7 +95,7 @@ export async function authorize(clientId: string, clientSecret: string, allowedD
 	url.searchParams.set('scope', SCOPES.join(' '));
 	url.searchParams.set('code_challenge', challenge);
 	url.searchParams.set('code_challenge_method', 'S256');
-	url.searchParams.set('state', state);
+	url.searchParams.set('state', routedState);
 	url.searchParams.set('access_type', 'offline');
 	url.searchParams.set('prompt', 'consent select_account');
 	if (allowedDomain) {
@@ -100,7 +104,7 @@ export async function authorize(clientId: string, clientSecret: string, allowedD
 	}
 
 	try {
-		await vscode.env.openExternal(vscode.Uri.parse(url.toString()));
+		await openConsentPage(url.toString());
 		const code = await codePromise;
 		return await exchangeCode(code, verifier, redirectUri, clientId, clientSecret);
 	} finally {
@@ -108,12 +112,17 @@ export async function authorize(clientId: string, clientSecret: string, allowedD
 	}
 }
 
-function startLoopbackServer(expectedState: string): Promise<{
+function startLoopbackServer(baseState: string): Promise<{
 	server: http.Server;
-	redirectUri: string;
+	/** Where this listener can be reached from the machine it runs on. */
+	loopbackUri: string;
+	/** `baseState` with the listening port appended, which is what Google echoes back. */
+	state: string;
 	codePromise: Promise<string>;
 }> {
 	return new Promise((resolveServer, rejectServer) => {
+		// Set once the port is known; the handler below reads it at request time.
+		let expectedState = baseState;
 		let settle: { resolve(code: string): void; reject(error: Error): void };
 		const codePromise = new Promise<string>((resolve, reject) => {
 			settle = { resolve, reject };
@@ -159,9 +168,50 @@ function startLoopbackServer(expectedState: string): Promise<{
 		server.on('error', rejectServer);
 		server.listen(0, '127.0.0.1', () => {
 			const { port } = server.address() as AddressInfo;
-			resolveServer({ server, redirectUri: `http://127.0.0.1:${port}`, codePromise });
+			// The port is only known now, and the hosted callback needs it to
+			// find this listener again, so it travels inside the state.
+			expectedState = `${baseState}.${port}`;
+			resolveServer({ server, loopbackUri: `http://127.0.0.1:${port}`, state: expectedState, codePromise });
 		});
 	});
+}
+
+/**
+ * Decides the address Google returns the sign-in to.
+ *
+ * On the desktop the loopback listener is on the same machine as the browser,
+ * so Google can reach it directly. Hosted, it is not: the browser would be
+ * asked to open a port on its own machine, where nothing is listening, which
+ * is the "site cannot be reached" a hosted sign-in ends at. There the answer
+ * goes to this server's own callback, one address that never varies and can
+ * therefore be registered with Google, and the server hands it on.
+ */
+async function resolveRedirect(loopbackUri: string): Promise<string> {
+	if (vscode.env.uiKind !== vscode.UIKind.Web) {
+		return loopbackUri;
+	}
+	const origin = await vscode.commands.executeCommand<string>('bbf.signIn.origin');
+	if (!origin) {
+		throw new Error('Could not determine the address this editor is served from.');
+	}
+	return `${origin.replace(/\/+$/, '')}/bbf-auth/callback`;
+}
+
+/**
+ * Sends the user to Google's consent page.
+ *
+ * On the desktop the editor hands the URL to the operating system. In the
+ * hosted build this extension runs in the remote extension host, where that
+ * same call resolves on the server: no tab opens where the user is, and
+ * sign-in waits for a redirect that never comes. There the window opens the
+ * tab itself, through a command the workbench registers for exactly this.
+ */
+async function openConsentPage(url: string): Promise<void> {
+	if (vscode.env.uiKind === vscode.UIKind.Web) {
+		await vscode.commands.executeCommand('bbf.signIn.openInNewTab', url);
+		return;
+	}
+	await vscode.env.openExternal(vscode.Uri.parse(url));
 }
 
 async function exchangeCode(code: string, verifier: string, redirectUri: string, clientId: string, clientSecret: string): Promise<ITokenResponse> {

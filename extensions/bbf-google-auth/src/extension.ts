@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { Config } from './config.js';
+import { Config, googleCredentials } from './config.js';
 import { assertAllowedDomain, authorize, identityFromIdToken, refreshToken } from './googleAuth.js';
 
 const PROVIDER_ID = 'bbf-google';
@@ -49,13 +49,17 @@ class GoogleAuthenticationProvider implements vscode.AuthenticationProvider, vsc
 	}
 
 	async createSession(scopes: readonly string[]): Promise<vscode.AuthenticationSession> {
-		const { googleClientId: clientId, googleClientSecret: clientSecret = '', allowedDomain } = Config;
+		const isWeb = vscode.env.uiKind === vscode.UIKind.Web;
+		const { clientId, clientSecret } = googleCredentials(isWeb);
+		const { allowedDomain } = Config;
 
 		if (!clientId) {
-			// Misconfigured build rather than user error, so say so plainly.
-			await vscode.window.showErrorMessage(vscode.l10n.t(
-				'This build of BlackBox Code has no Google OAuth client configured. Set googleClientId in extensions/bbf-google-auth/src/config.ts and rebuild.'));
-			throw new Error('No Google OAuth client configured in this build.');
+			// Misconfigured build rather than user error, so say so plainly, and
+			// name the client that is missing: a hosted editor needs its own.
+			await vscode.window.showErrorMessage(isWeb
+				? vscode.l10n.t('This deployment of BlackBox Code has no Google OAuth client for the browser. Set BBF_GOOGLE_WEB_CLIENT_ID and BBF_GOOGLE_WEB_CLIENT_SECRET where the server runs, from a credential of type "Web application".')
+				: vscode.l10n.t('This build of BlackBox Code has no Google OAuth client configured. Set googleClientId in extensions/bbf-google-auth/src/config.ts and rebuild.'));
+			throw new Error(`No Google OAuth client configured for the ${isWeb ? 'hosted' : 'desktop'} build.`);
 		}
 
 		const tokens = await vscode.window.withProgress(
@@ -102,7 +106,10 @@ class GoogleAuthenticationProvider implements vscode.AuthenticationProvider, vsc
 			if (!stored.refreshToken) {
 				throw new Error('Session expired and no refresh token is available.');
 			}
-			const tokens = await refreshToken(stored.refreshToken, Config.googleClientId, Config.googleClientSecret ?? '');
+			// The same client that issued the refresh token has to renew it, so
+			// this follows where the editor is running just as sign-in does.
+			const refreshWith = googleCredentials(vscode.env.uiKind === vscode.UIKind.Web);
+			const tokens = await refreshToken(stored.refreshToken, refreshWith.clientId, refreshWith.clientSecret);
 			const identity = identityFromIdToken(tokens.id_token ?? stored.idToken);
 			// Re-check on every refresh: the account may have left the domain.
 			assertAllowedDomain(identity, Config.allowedDomain);

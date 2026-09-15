@@ -5,7 +5,7 @@ title VSCode Server
 
 set ROOT_DIR=%~dp0..
 
-pushd %ROOT_DIR%
+pushd "%ROOT_DIR%"
 
 :: Configuration
 set NODE_ENV=development
@@ -27,7 +27,7 @@ if not exist "%NODE%" (
 popd
 
 :: Launch Server
-call "%NODE%" %ROOT_DIR%\scripts\code-server.js %*
+call "%NODE%" "%ROOT_DIR%\scripts\code-server.js" %*
 
 
 endlocal

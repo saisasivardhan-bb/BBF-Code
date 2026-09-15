@@ -86,22 +86,19 @@ else {
 			reportIssueUrl: 'https://github.com/microsoft/vscode/issues/new',
 			licenseName: 'MIT',
 			licenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt',
-			serverLicenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt',
-			defaultChatAgent: {
-				extensionId: 'GitHub.copilot',
-				chatExtensionId: 'GitHub.copilot-chat',
-				provider: {
-					default: {
-						id: 'github',
-						name: 'GitHub',
-					},
-					enterprise: {
-						id: 'github-enterprise',
-						name: 'GitHub Enterprise',
-					}
-				},
-				providerScopes: []
-			}
+			serverLicenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt'
+			// Deliberately no `defaultChatAgent`. Upstream names Copilot here so a
+			// browser built from sources still has chat to set up; BBF ships BBF AI
+			// Coder instead, and `product.json` names no agent precisely so that the
+			// Copilot setup contribution disables itself.
+			//
+			// These defaults are not replaced by the server's product configuration,
+			// they are merged under it (see `web.main.ts`), so a key BBF simply omits
+			// survives from here. Naming Copilot therefore switched the whole setup
+			// path back on in the browser: it registered its own default chat
+			// participant, which shadowed BBF AI Coder's, so asking the hosted editor
+			// a question offered a GitHub sign-in and then "Chat setup failed" --
+			// while the desktop build, which never reads these defaults, answered.
 		});
 	}
 }

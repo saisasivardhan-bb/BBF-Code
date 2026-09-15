@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { createReadStream, promises } from 'fs';
+import { homedir } from 'os';
 import type * as http from 'http';
 import * as cookie from 'cookie';
 import * as crypto from 'crypto';
@@ -110,9 +111,72 @@ export async function serveFile(filePath: string, cacheControl: CacheControl, lo
 
 const APP_ROOT = dirname(FileAccess.asFileUri('').fsPath);
 
+/**
+ * Where per-account folders live. `BBF_WORKSPACES_ROOT` overrides it so a
+ * deployment can put them on a data disk rather than beside the server.
+ */
+function workspacesRoot(): string {
+	return process.env['BBF_WORKSPACES_ROOT'] || join(homedir(), 'BlackBox Code', 'workspaces');
+}
+
+/**
+ * Turns an account label into one folder name, or nothing if it cannot.
+ *
+ * Everything outside a small safe set becomes a dash, so no separator, drive
+ * letter or `..` survives: whatever the workbench sends, the result is a single
+ * segment that can only land inside {@link workspacesRoot}.
+ */
+function workspaceFolderName(account: string): string | undefined {
+	const name = account
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9._@-]+/g, '-')
+		.replace(/^[-.]+/, '')
+		.slice(0, MAX_WORKSPACE_NAME);
+	return name.length > 0 ? name : undefined;
+}
+
+
 const STATIC_PATH = `/static`;
 const CALLBACK_PATH = `/callback`;
 const WEB_EXTENSION_PATH = `/web-extension-resource`;
+/**
+ * Where Google returns a BBF sign-in.
+ *
+ * It has to be one fixed address: Google compares a redirect against the ones
+ * registered for the client character for character, so the callback the
+ * editor generates per request -- `/callback` with its own query -- cannot be
+ * registered. This path never varies, and the request is handed on from here.
+ */
+const BBF_AUTH_CALLBACK_PATH = `/bbf-auth/callback`;
+/**
+ * Where the browser fetches the server's half of the key its secrets are sealed with.
+ *
+ * Without this the workbench finds no encryption in a browser and keeps secrets
+ * in memory, so a signed-in session lasts exactly until the page is reloaded.
+ * The client seals each value with a random key of its own combined with this
+ * one, and keeps the result in local storage: the stored data is useless to
+ * anyone who cannot also ask this server.
+ */
+export const SECRET_KEY_PATH = `/secret-key`;
+/** AES-256, the length the workbench expects back from {@link SECRET_KEY_PATH}. */
+const SECRET_KEY_BYTES = 32;
+/** The name the workbench reads that path under; see `ServerKeyedAESCrypto`. */
+const secretStorageKeyPathCookieName = 'vscode-secret-key-path';
+/**
+ * Where the workbench asks for the folder belonging to the person using it.
+ *
+ * A hosted editor serves one machine, so without this everyone who opens the
+ * link lands in whatever folder the server was last pointed at -- someone
+ * else's work. Each signed-in account gets a folder of its own here instead.
+ *
+ * This organises people; it does not separate them. Everyone still runs as the
+ * same account on the same machine, and a terminal reaches the whole disk. Real
+ * separation needs one server per person, not one folder per person.
+ */
+const BBF_WORKSPACE_PATH = `/bbf-workspace`;
+/** Keeps a pathological account name from becoming a pathological folder name. */
+const MAX_WORKSPACE_NAME = 64;
 const webWorkerExtensionHostIframeScriptSHA = 'sha256-daEgfo2VIXpx2Np71KqCCbkeQwv+68vPrx54XRcbdcs=';
 
 /**
@@ -192,6 +256,18 @@ export class WebClientServer {
 			if (pathname === CALLBACK_PATH) {
 				// callback support
 				return this._handleCallback(res);
+			}
+			if (pathname === BBF_AUTH_CALLBACK_PATH) {
+				// BBF Google sign-in support
+				return this._handleBBFAuthCallback(res, parsedUrl);
+			}
+			if (pathname === SECRET_KEY_PATH) {
+				// secret storage support
+				return this._handleSecretKey(res);
+			}
+			if (pathname === BBF_WORKSPACE_PATH) {
+				// per-user folder support
+				return this._handleBBFWorkspace(res, parsedUrl);
 			}
 			if (pathname.startsWith(WEB_EXTENSION_PATH) && pathname.charCodeAt(WEB_EXTENSION_PATH.length) === CharCode.Slash) {
 				// extension resource support
@@ -482,19 +558,34 @@ export class WebClientServer {
 			'Content-Type': 'text/html',
 			'Content-Security-Policy': cspDirectives
 		};
+
+		// Tells the workbench where to fetch the server's half of the key it
+		// seals secrets with. Without it the browser finds no encryption, keeps
+		// secrets in memory, and a signed-in session dies with the page. Read
+		// from script, so deliberately not httpOnly.
+		const setCookies = [cookie.serialize(
+			secretStorageKeyPathCookieName,
+			posix.join(basePath, this._productPath, SECRET_KEY_PATH),
+			{
+				sameSite: 'lax',
+				maxAge: 60 * 60 * 24 * 7 /* 1 week */
+			}
+		)];
+
 		if (this._connectionToken.type !== ServerConnectionTokenType.None) {
 			// At this point we know the client has a valid cookie
 			// and we want to set it prolong it to ensure that this
 			// client is valid for another 1 week at least
-			headers['Set-Cookie'] = cookie.serialize(
+			setCookies.push(cookie.serialize(
 				connectionTokenCookieName,
 				this._connectionToken.value,
 				{
 					sameSite: 'lax',
 					maxAge: 60 * 60 * 24 * 7 /* 1 week */
 				}
-			);
+			));
 		}
+		headers['Set-Cookie'] = setCookies;
 
 		res.writeHead(200, headers);
 		return void res.end(data);
@@ -522,6 +613,107 @@ export class WebClientServer {
 	/**
 	 * Handle HTTP requests for /callback
 	 */
+	/**
+	 * Hands a finished Google sign-in to the extension waiting for it.
+	 *
+	 * That extension listens on a loopback port of the machine it runs on, which
+	 * is the browser's own machine only on the desktop. Hosted, it is this
+	 * server, so Google is sent here and the answer is carried the last hop from
+	 * inside. The port travels in `state`, which the extension made: a request
+	 * quoting a state it does not recognise is refused there, and one quoting no
+	 * usable port is refused here.
+	 */
+	/**
+	 * Returns the folder belonging to an account, creating it on first use.
+	 *
+	 * The name is derived from the account the workbench says is signed in, and
+	 * is reduced to a single harmless path segment here: a name is a label, and
+	 * a label must never be able to choose where on the disk it lands.
+	 */
+	private async _handleBBFWorkspace(res: http.ServerResponse, parsedUrl: URL): Promise<void> {
+		const reply = (status: number, body: object) => {
+			res.writeHead(status, { 'Content-Type': 'application/json' });
+			res.end(JSON.stringify(body));
+		};
+
+		const account = parsedUrl.searchParams.get('account') ?? '';
+		const name = workspaceFolderName(account);
+		if (!name) {
+			return reply(400, { error: 'An account is required.' });
+		}
+
+		try {
+			const folder = join(workspacesRoot(), name);
+			await promises.mkdir(folder, { recursive: true });
+			// A path, not an fsPath: the workbench turns this into a
+			// `vscode-remote` URI, whose path is always posix-shaped.
+			return reply(200, { path: URI.file(folder).path });
+		} catch (error) {
+			this._logService.error('[bbf-workspace] could not prepare a folder', error);
+			return reply(500, { error: 'Could not prepare a folder for this account.' });
+		}
+	}
+
+	/**
+	 * Serves the server's half of the secret-storage key: 32 raw bytes.
+	 *
+	 * Kept on disk beside the server's other data so that a restart does not
+	 * invalidate everything the browser has already sealed, which would sign
+	 * every user out. It is created on first use with the same generator the
+	 * connection token uses.
+	 */
+	private async _handleSecretKey(res: http.ServerResponse): Promise<void> {
+		try {
+			const keyPath = join(this._environmentService.userDataPath, 'secret-key');
+			let key: Buffer;
+			try {
+				key = await promises.readFile(keyPath);
+				if (key.length !== SECRET_KEY_BYTES) {
+					throw new Error(`expected ${SECRET_KEY_BYTES} bytes, found ${key.length}`);
+				}
+			} catch {
+				key = crypto.randomBytes(SECRET_KEY_BYTES);
+				await promises.mkdir(dirname(keyPath), { recursive: true });
+				// Readable only by this account: it is what protects every stored secret.
+				await promises.writeFile(keyPath, key, { mode: 0o600 });
+			}
+			res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Length': String(key.length) });
+			res.end(key);
+		} catch (error) {
+			this._logService.error('[secret-key] could not provide a key; secrets will not survive a reload', error);
+			res.writeHead(500);
+			res.end();
+		}
+	}
+
+	private async _handleBBFAuthCallback(res: http.ServerResponse, parsedUrl: URL): Promise<void> {
+		const reply = (status: number, message: string) => {
+			res.writeHead(status, { 'Content-Type': 'text/html; charset=utf-8' });
+			res.end(`<!doctype html><meta charset="utf-8"><title>BlackBox Code</title><p>${message}</p>`);
+		};
+
+		// The extension puts the port it is listening on at the end of the state
+		// it generated, so a request carrying neither is not a sign-in of ours.
+		const port = Number((parsedUrl.searchParams.get('state') ?? '').split('.').pop());
+		if (!Number.isInteger(port) || port < 1024 || port > 65535) {
+			return reply(400, 'This is not a BlackBox Code sign-in.');
+		}
+
+		// Loopback only: the last hop stays on this machine and never goes out.
+		const target = new URL(`http://127.0.0.1:${port}/`);
+		parsedUrl.searchParams.forEach((value, key) => target.searchParams.set(key, value));
+
+		try {
+			const response = await fetch(target, { signal: AbortSignal.timeout(10_000) });
+			// The extension writes the page the user is left looking at.
+			res.writeHead(response.status, { 'Content-Type': 'text/html; charset=utf-8' });
+			res.end(await response.text());
+		} catch (error) {
+			this._logService.error(`[BBF sign-in] no listener on 127.0.0.1:${port}`, error);
+			reply(502, 'The sign-in could not be completed. Start it again from the editor.');
+		}
+	}
+
 	private async _handleCallback(res: http.ServerResponse): Promise<void> {
 		const filePath = FileAccess.asFileUri('vs/code/browser/workbench/callback.html').fsPath;
 		const data = (await promises.readFile(filePath)).toString();

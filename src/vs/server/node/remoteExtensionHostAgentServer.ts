@@ -38,7 +38,7 @@ import { determineServerConnectionToken, requestHasValidConnectionToken as httpR
 import { IServerEnvironmentService, ServerParsedArgs } from './serverEnvironmentService.js';
 import { IServerLifetimeService } from './serverLifetimeService.js';
 import { setupServerServices, SocketServer } from './serverServices.js';
-import { CacheControl, serveError, serveFile, WebClientServer } from './webClientServer.js';
+import { CacheControl, SECRET_KEY_PATH, serveError, serveFile, WebClientServer } from './webClientServer.js';
 const require = createRequire(import.meta.url);
 
 function parseRequestUrl(requestUrl: string): URL | undefined {
@@ -119,11 +119,6 @@ class RemoteExtensionHostAgentServer extends Disposable implements IServerAPI {
 	}
 
 	public async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
-		// Only serve GET requests
-		if (req.method !== 'GET') {
-			return serveError(req, res, 405, `Unsupported method ${req.method}`);
-		}
-
 		if (!req.url) {
 			return serveError(req, res, 400, `Bad request.`);
 		}
@@ -145,6 +140,15 @@ class RemoteExtensionHostAgentServer extends Disposable implements IServerAPI {
 		// for now accept all paths, with or without server product path
 		if (pathname.startsWith(this._serverProductPath) && pathname.charCodeAt(this._serverProductPath.length) === CharCode.Slash) {
 			pathname = pathname.substring(this._serverProductPath.length);
+		}
+
+		// Only serve GET requests, with one exception: the workbench asks for the
+		// server's half of the secret-storage key with POST, because a GET is the
+		// request browsers and proxies feel free to cache. Refusing it left the
+		// browser unable to seal anything, so a signed-in session died with the
+		// page -- the reload that asked the user to sign in all over again.
+		if (req.method !== 'GET' && !(req.method === 'POST' && pathname === SECRET_KEY_PATH)) {
+			return serveError(req, res, 405, `Unsupported method ${req.method}`);
 		}
 
 		// Version

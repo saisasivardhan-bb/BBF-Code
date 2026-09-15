@@ -412,6 +412,7 @@ import './contrib/bbf/browser/bbfGoogleSignIn.contribution.js';
 import './contrib/bbf/browser/bbfSignInGate.contribution.js';
 import './contrib/bbf/browser/bbfChatSetup.contribution.js';
 import './contrib/bbf/browser/bbfChatInput.contribution.js';
+import './contrib/bbf/browser/bbfWorkspace.contribution.js';
 
 // Onboarding (scenario engine)
 import './contrib/onboarding/browser/onboarding.contribution.js';
